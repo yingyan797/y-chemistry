@@ -1,5 +1,7 @@
 import numpy as np
+import sympy as sp
 import copy
+
 def parse_elem(res:dict, fml:str):
     name, fac, i = "", "", 0
     if fml and fml[0].isupper():
@@ -51,7 +53,7 @@ def res_join(pref:dict, res:dict, fac:int):
 def fml_clear(fml:str):
     res = ""
     for c in fml:
-        if c.isalnum() or c in "(+)":
+        if c.isalnum() or c in "(+)[{]}":
             res += c
     return res
 
@@ -111,7 +113,7 @@ class Equation:
         if not any(filter(lambda c: c.same(coeffs), self.cof_tree)):
             self.cof_tree.append(coeffs)
 
-    def eqcheck(self, coflim=20):
+    def eq_tree(self, coflim=20):
         trials = []
         while len(trials) < 40000:
             cof = self.cof_tree.pop(0)
@@ -125,13 +127,55 @@ class Equation:
                     ncof[i][j] += 1
                     if ncof[i][j] <= coflim:
                         self.cofinsert(Coefficients(ncof,max(cof.depth, ncof[i][j])))
-        print(len(trials))
-        raise TimeoutError("Cannot find solution")
+        raise TimeoutError(f"Cannot find solution in {len(trials)} trials")
+    
+    def eq_guass(self):
+        compl, compr = self.compounds[0].T, self.compounds[1].T
+        mat = np.concatenate((compl, -compr), axis=1)
+        rrmat, pvt = sp.Matrix(mat).rref()
+        res = np.concatenate((np.multiply(-1,rrmat[:,-1])[:,0], [sp.Rational(1,1)]), axis=0)
+        for j in range(1, len(res)):
+            if res[0].denominator > 1 or res[1].denominator > 1:
+                fac = res[0].cofactors(res[j])[0]
+                res = np.divide(res, fac)
+        coeffs = ([], [])
+        for i in range(2):
+            for j in range(len(self.compounds[i])):
+                c = res[i*len(self.compounds[0])+j]
+                if c > 1:
+                    coeffs[i].append((c, self.compname[i][j]))
+                else:
+                    coeffs[i].append(("", self.compname[i][j]))
+        linsys = " --- System of linear equations ---\n"
+        for e,i in self.elem_map.items():
+            line = f"{e} -> "
+            for j in range(compl.shape[1]):
+                term = f"x{j} + "
+                if compl[i][j] > 1: 
+                    term = f"{compl[i][j]}" + term
+                elif not compl[i][j]:
+                    term = ""
+                line += term
+            line = line[:-2]+"= "
+            for j in range(compr.shape[1]):
+                term = f"x{j+compl.shape[1]} + "
+                if compr[i][j] > 1: 
+                    term = f"{compr[i][j]}" + term
+                elif not compr[i][j]:
+                    term = ""
+                line += term
+            linsys += line[:-2]+"\n"
+        linsys += f"\n --- Gaussian Elimination --- \n{rrmat}"
+
+        return coeffs, linsys
 
 if __name__ == "__main__":
-    # eq = Equation("K4[Fe(SCN)6] + K2Cr2O7 + H2SO4", "Fe2(SO4)3 + Cr2(SO4)3 + CO2 + H2O + K2SO4 + KNO3")
-    eq = Equation("  S    +   HNO3  "," H2SO4   +    NO2   +   H2O")
-    print(eq.eqcheck())
+    eq = Equation("K4[Fe(SCN)6] + K2Cr2O7 + H2SO4", "Fe2(SO4)3 + Cr2(SO4)3 + CO2 + H2O + K2SO4 + KNO3")
+    eq = Equation("H2+O2", "H2O")
+    # # eq = Equation("  S    +   HNO3  "," H2SO4   +    NO2   +   H2O")
+    print(eq.eq_guass())
+    # print(eq.eq_tree())
+    
     # def binsert(v:int, vs:list[int]):
     #     il, ih = 0, len(vs)
 

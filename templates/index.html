@@ -1,18 +1,19 @@
 <head><title>Y Chemistry</title> </head>
 <body>
     <h3 style="background-color: #6495ed;">Chemistry equation coefficients | <a href="/">Refresh page</a></h3>
-    <form action="/" method="post">
-        <textarea name="compl" rows="1" cols="45" style="{% if not site.side %}background-color: skyblue; {% endif %}">{{site.words[0]}}</textarea> → 
-        <textarea name="compr" rows="1" cols="45" style="{% if site.side %}background-color: skyblue; {% endif %}">{{site.words[1]}}</textarea> <br>
-        <table>{% for row in site.eltab %} <tr>{% for elem in row %} <td><input type="submit" name="type_{{elem[1]}}" value="{{elem[1]}}"  title="{% if elem[0] %}{{elem[0]}} {{elem[2]}}{% endif %}" {% if not elem %}disabled{% endif %}></td> {% endfor %}</tr> {% endfor %}</table>
-        <button type="submit" name="sync" value="u" style="background-color: lightgreen;">Update inputbox</button>
-        <button type="submit" name="sw" value="0" style="background-color: skyblue;"><-</button>
-        <button type="submit" name="sw" value="1" style="background-color: skyblue;">-></button>
-        <button type="submit" name="calc" value="calc" style="background-color: cornflowerblue;">Calculate >></button>
+    <form action="/" method="post" enctype="multipart/form-data">
+        <textarea name="equation" rows="2" cols="85" style="font-size: small;"></textarea><button type="submit" name="sync" value="u" style="background-color: lightgreen;">Fill inputbox</button>
+        <button type="submit" name="sw" value="0"><-</button>
+        <button type="submit" name="sw" value="1">-></button>
+        <br><textarea name="compl" rows="2" cols="45" style="{% if not site.side %}background-color: skyblue; {% endif %}">{{site.words[0]}}</textarea> → 
+        <textarea name="compr" rows="2" cols="45" style="{% if site.side %}background-color: skyblue; {% endif %}">{{site.words[1]}}</textarea> <br>
+        <table>{% for row in site.eltab %} <tr>{% for elem in row %} <td style="width: 40px; background-color: azure;"><input type="submit" name="type_{{elem[1]}}" value="{{elem[1]}}"  title="{% if elem[0] %}{{elem[0]}} {{elem[2]}}{% endif %}" {% if not elem %}disabled{% endif %}></td> {% endfor %}</tr> {% endfor %}</table>
+        <button type="submit" name="calc_tree" value="calc" style="background-color: cornflowerblue;">Tree search ></button>
+        <button type="submit" name="calc_gauss" value="calc" style="background-color: lightgoldenrodyellow;">Gaussian eliminate ></button>
     </form>
-    <h3>Result ({{nt}} trials)</h3> {%  if cofl and cofr %}
-    <b style="color: lightseagreen;">{{cofl[0][0]}}</b>{{cofl[0][1]}}{% for c in cofl[1:] %}+<b style="color: lightseagreen;">{{c[0]}}</b>{{c[1]}}{% endfor %} == 
-    <b style="color: lightseagreen;">{{cofr[0][0]}}</b>{{cofr[0][1]}}{% for c in cofr[1:] %}+<b style="color: lightseagreen;">{{c[0]}}</b>{{c[1]}}{% endfor %} {% endif %}
-    <br><textarea readonly rows="20" cols="50" style="font-size: small;">{% for t in trials %}{{t}}
-{% endfor %}</textarea>
+    <h3>Result {% if nt %}({{nt}} trials){% endif %}</h3> <div style="font-size: large;"> {%  if cofl and cofr %}
+    <b style="color: lightseagreen;">{{cofl[0][0]}}</b>{{cofl[0][1]}}{% for c in cofl[1:] %} + <b style="color: lightseagreen;">{{c[0]}}</b>{{c[1]}}{% endfor %} == 
+    <b style="color: lightseagreen;">{{cofr[0][0]}}</b>{{cofr[0][1]}}{% for c in cofr[1:] %} + <b style="color: lightseagreen;">{{c[0]}}</b>{{c[1]}}{% endfor %} {% endif %}</div>
+    <br><textarea readonly rows="20" cols="60" {% if nt > 20 %} style="font-size: small; {% endif %}">{% if nt %}{% for t in info %}{{t}}
+{% endfor %}{% elif info %}{{info}}{% endif %}</textarea>
 </body>
