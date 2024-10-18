@@ -45,8 +45,54 @@ class Website:
             self.words[self.side] = ""
         else:
             self.words[self.side] += k
-    
+
+class Keyboard:
+    def __init__(self) -> None:
+        self.text = ""
+        self.keywords = [[".","\"",":","<",">","{","}","(",")","self","__init__(self"],["def ","class ","for ","while ","in ","range(","len(","return ","lambda ","print(","raise ","if ","elif ","else:","+= ","*= "]]
+        [kw.sort() for kw in self.keywords]
+        self.funcs = ["enter","enter_tab","space","<-","AC"]
+        self.names = []
+
+    def parse_names(self, symbs="_"):
+        word = ""
+        self.names = []
+        for c in self.text:
+            if c.isalnum() or c in symbs:
+                word += c
+            else:
+                if len(word) > 1 and word not in self.names:
+                    dup = False
+                    for k in range(len(self.keywords)):
+                        for kw in self.keywords[k]:
+                            if word == kw[:len(kw)-k]:
+                                dup = True
+                                break
+                    if not dup:
+                        self.names.append(word)
+                word = ""                    
+        if word:
+            self.names.append(word)
+    def op(self, opname):
+        match opname:
+            case "enter":
+                self.text += "\n"
+            case "enter_tab":
+                lines = self.text.split("\n")
+                nid = 0
+                for c in lines:
+                    if c == " ":
+                        nid += 1
+                self.text += "\n"+"  "*(int(nid/2)+1)
+            case "space":
+                self.text += " "
+            case "<-":
+                self.text = self.text[:-1]
+            case "AC":
+                self.text = ""
+
 site = Website()
+keyboard = Keyboard()
 @app.route('/', methods=['GET', 'POST'])    # main page
 def index():
     fm = request.form
@@ -70,6 +116,19 @@ def index():
             site.enter(k[5:])
             break
     return render_template("index.html", cofl=cofl, cofr=cofr, info=info, nt=nt, site=site)
+
+@app.route('/editor', methods=['GET', 'POST'])    # main page
+def editor():
+    fm = request.form
+    keyboard.text = fm.get("tbox")
+    if not keyboard.text:
+        keyboard.text = ""
+    if word:=fm.get("word"):
+        keyboard.text += word
+    elif func:=fm.get("func"):
+        keyboard.op(func)
+    keyboard.parse_names()
+    return render_template("editor.html", kb=keyboard)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5007, debug=True)

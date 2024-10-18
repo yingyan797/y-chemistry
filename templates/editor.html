@@ -1,0 +1,8 @@
+<head><title>Y Code</title></head>
+<body>
+    <h3 style="background-color: skyblue;"><a href="/editor">Python editor</a></h3>
+    <form action="/editor" method="post">
+    <table><tr><td style="width: 10%;">{% for kw in kb.keywords %}{% for w in kw %} <input type="submit" name="word" value="{{w}}">{% endfor %}{% endfor %}</td>
+        <td><textarea name="tbox" rows="30" cols="70">{{kb.text}}</textarea></td><td>{% for w in kb.names %}<input type="submit" name="word" value="{{w}}">{% endfor %}</td>
+    </tr><tr><td></td><td>{% for w in kb.funcs %}<input type="submit" name="func" value="{{w}}">{% endfor %}</td></tr></table></form>
+</body>

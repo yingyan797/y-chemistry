@@ -1,8 +1,8 @@
 <head><title>Y Chemistry</title> </head>
 <body>
-    <h3 style="background-color: #6495ed;">Chemistry equation coefficients | <a href="/">Refresh page</a></h3>
+    <h3 style="background-color: #6495ed;">Chemistry equation coefficients | <a href="/">Refresh page</a> | <a href="/editor">Y Code</a></h3>
     <form action="/" method="post" enctype="multipart/form-data">
-        <textarea name="equation" rows="2" cols="85" style="font-size: small;"></textarea><button type="submit" name="sync" value="u" style="background-color: lightgreen;">Fill inputbox</button>
+        <textarea name="equation" rows="2" cols="85"></textarea><button type="submit" name="sync" value="u" style="background-color: lightgreen;">Fill inputbox</button>
         <button type="submit" name="sw" value="0"><-</button>
         <button type="submit" name="sw" value="1">-></button>
         <br><textarea name="compl" rows="2" cols="45" style="{% if not site.side %}background-color: skyblue; {% endif %}">{{site.words[0]}}</textarea> → 
